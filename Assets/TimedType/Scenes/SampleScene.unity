@@ -121,8 +121,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 56818663}
-  - component: {fileID: 56818664}
-  - component: {fileID: 56818665}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -145,45 +143,10 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 962, y: 2000}
-  m_Pivot: {x: 0, y: 1}
---- !u!114 &56818664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 56818662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1297475563, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
---- !u!114 &56818665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 56818662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
-  m_VerticalFit: 0
+  m_SizeDelta: {x: 0, y: 900}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &100775672
 GameObject:
   m_ObjectHideFlags: 0
@@ -577,10 +540,10 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: -40, y: -20}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &545260356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -837,22 +800,67 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetText: {fileID: 545260356}
   printStrings:
-  - 'This is a test.
-
-
-'
-  - 'Just modifed the Sample Scene to make sure it''s included in repo.
-
-
-'
-  - "// Use this for initialization\r\n\tvoid Start () {\r\n\t\ttargetText.text =
-    \"\";\r\n\r\n\t\tif (printOnStart)\r\n\t\t\ttypingCoroutine = StartCoroutine (EnterNextString
-    ());\r\n\t}\r\n\r\n\t//Use this to set as a UI element action.\r\n\tpublic void
-    BtnPressNextSequence () {\r\n\t\tPrintNextSequence ();\r\n\t}"
+  - This is a test.
+  - Press a continue input to finish typing an entry immediately. These inputs are
+    configurable in the Unity editor.
+  - But if you change them you'll probably want to update the continue message to
+    indicate exactly how to proceed.
+  - Auto expansion of the text field and content window transforms are not yet implemented.
+    The next message will be too large to fit into this scroll view content window.
+    One way to avoid this is to use the "clear between entries" option, but that wont
+    help if you have a single message that is too large to fit within one content
+    window. Provided anyone is interested in this project, I'll modify it to proceduralize
+    the instantiation of text objects as children of the content window. This would
+    make fixing both of these issues a trivial issue and allow for other features,
+    such as coloring each entry as you'd like. Till then we'll just call it good.
+  - "using System;\r\nusing System.Collections;\r\nusing System.Collections.Generic;\r\nusing
+    UnityEngine;\r\nusing UnityEngine.UI;\r\n\r\npublic class TimedTextEntry : MonoBehaviour
+    {\r\n\t//Drags\r\n\tpublic Text targetText;\r\n\t\r\n\t//Editor Config\r\n\t[TextArea]
+    public string[] printStrings;\r\n\t[TextArea] public string continueMessage =
+    \"Press Space or Click to Continue...\\r\";\r\n\tpublic float letterDelay = 0.1f;\r\n\tpublic
+    float maxRandomDelay = 0.05f;\r\n\tpublic bool clearBetweenEntries = false;\r\n\tpublic
+    bool printOnStart = true;\r\n\tpublic UnityEngine.KeyCode[] continueKeyCodes;\r\n\r\n\t//Bookkeeping\r\n\tCoroutine
+    typingCoroutine;\r\n\tint entryIdx;\r\n\tstring nextStr;\r\n\tbool noDelay;\r\n\tbool
+    finishedPrinting;\r\n\r\n\t//Debug\r\n\t[SerializeField] private bool debugTimedText;\r\n\r\n\t//
+    Use this for initialization\r\n\tvoid Start () {\r\n\t\ttargetText.text = \"\";\r\n\r\n\t\tif
+    (printOnStart)\r\n\t\t\tNextSequence ();\r\n\t}\r\n\r\n\t//Use this to set as
+    a UI element action, such as button press.\r\n\tpublic void BtnPressNextSequence
+    () {\r\n\t\tNextSequence ();\r\n\t}\r\n\r\n\t//Check for accelerated output via
+    user input.\r\n\tvoid Update () {\r\n\t\tif (finishedPrinting)\r\n\t\t\treturn;\r\n\r\n\t\t//If
+    no existing continue inputs, keep moving.\r\n\t\tif (typingCoroutine == null &&\r\n\t\t\t(continueKeyCodes.Length
+    == 0 || continueKeyCodes[0] == KeyCode.None)) {\r\n\t\t\tNextSequence ();\r\n\t\t\treturn;\r\n\t\t}\r\n\r\n\t\t//Check
+    for continue key code input.\r\n\t\tfor (int i = 0; i < continueKeyCodes.Length;
+    i++) {\r\n\t\t\tif (Input.GetKeyDown (continueKeyCodes[i])) {\r\n\t\t\t\tNextSequence
+    ();\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\t//Move to the next
+    sequence depending on state.\r\n\tvoid NextSequence () {\r\n\t\tif (typingCoroutine
+    == null) {\r\n\t\t\tNextEntry ();\r\n\t\t} else {\r\n\t\t\tnoDelay = true;\r\n\t\t}\r\n\t}\r\n\r\n\t//If
+    valid, start the coroutine to type a new entry.\r\n\tvoid NextEntry () {\r\n\t\tif
+    (entryIdx >= printStrings.Length) {\r\n\t\t\tif (debugTimedText)\r\n\t\t\t\tprint
+    (\"No more strings to display. Do something else now.\");\r\n\r\n\t\t\tfinishedPrinting
+    = true;\r\n\r\n\t\t\t//DoSomethingElseEntirelyHere();\r\n\r\n\t\t\treturn;\r\n\t\t}\r\n\r\n\t\tif
+    (clearBetweenEntries) {\r\n\t\t\ttargetText.text = \"\";\r\n\t\t\tnextStr = \"\";\r\n\t\t}\r\n\r\n\t\ttypingCoroutine
+    = StartCoroutine (TypeNextEntry ());\r\n\t}\r\n\r\n\t//Type out a timed entry
+    and push it to the text field.\r\n\tIEnumerator TypeNextEntry () {\r\n\t\tchar[]
+    charArray = printStrings[entryIdx].ToCharArray ();\r\n\r\n\t\t//Append to text
+    field.\r\n\t\tfor (int i = 0; i < charArray.Length; i++) {\r\n\t\t\tfloat nextDelay
+    = GetDelay ();\r\n\r\n\t\t\t//Check for user acceleration.\r\n\t\t\tif (noDelay)
+    {\r\n\t\t\t\tfor (int j = i; j < charArray.Length; j++)\r\n\t\t\t\t\tnextStr +=
+    charArray[j];\r\n\r\n\t\t\t\ttargetText.text = nextStr;\r\n\r\n\t\t\t\tEndEntry
+    ();\r\n\r\n\t\t\t\tyield break;\r\n\t\t\t}\r\n\r\n\t\t\t//Continue with normal
+    timed routine.\r\n\t\t\tnextStr += charArray[i];\r\n\t\t\ttargetText.text = nextStr;\r\n\r\n\t\t\tyield
+    return new WaitForSeconds (nextDelay);\r\n\t\t}\r\n\r\n\t\tEndEntry ();\r\n\t}\r\n\r\n\t//Indicate
+    an entry is finished.\r\n\tvoid EndEntry () {\r\n\t\tentryIdx++;\r\n\r\n\t\tif
+    (!string.IsNullOrEmpty(continueMessage))\r\n\t\t\ttargetText.text += continueMessage;\r\n\r\n\t\tnoDelay
+    = false;\r\n\t\ttypingCoroutine = null;\r\n\t}\r\n\r\n\t//Calculate the delay
+    before entry of next character.\r\n\t//Clear Code > Clever Code, lol.\r\n\tfloat
+    GetDelay () {\r\n\t\tfloat fullDelay = letterDelay;\r\n\t\tif (maxRandomDelay
+    != 0f)\r\n\t\t\tfullDelay += UnityEngine.Random.Range (-maxRandomDelay, maxRandomDelay);\r\n\r\n\t\tif
+    (fullDelay < 0f)\r\n\t\t\tfullDelay = 0f;\r\n\r\n\t\treturn fullDelay;\r\n\t}\r\n}\n"
   letterDelay: 0.1
   maxRandomDelay: 0.05
   clearBetweenEntries: 0
   printOnStart: 1
+  continueMessage: "Press Space or Left Click to Continue...\r"
   continueKeyCodes: 4301000020000000
   debugTimedText: 1
 --- !u!224 &986519596
@@ -1313,7 +1321,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1372694604}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.2195
+  m_Size: 0.48777777
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

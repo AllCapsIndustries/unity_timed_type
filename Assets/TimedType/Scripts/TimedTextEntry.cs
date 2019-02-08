@@ -7,13 +7,15 @@ using UnityEngine.UI;
 public class TimedTextEntry : MonoBehaviour {
 	//Drags
 	public Text targetText;
-	
+
 	//Editor Config
 	[TextArea] public string[] printStrings;
 	public float letterDelay = 0.1f;
 	public float maxRandomDelay = 0.05f;
 	public bool clearBetweenEntries = false;
 	public bool printOnStart = true;
+	
+	[TextArea] public string continueMessage = "Press Space or Click to Continue...";
 	public UnityEngine.KeyCode[] continueKeyCodes;
 
 	//Bookkeeping
@@ -77,6 +79,8 @@ public class TimedTextEntry : MonoBehaviour {
 
 			finishedPrinting = true;
 
+			//DoSomethingElseEntirelyHere();
+
 			return;
 		}
 
@@ -92,12 +96,15 @@ public class TimedTextEntry : MonoBehaviour {
 	IEnumerator TypeNextEntry () {
 		char[] charArray = printStrings[entryIdx].ToCharArray ();
 
+		if (entryIdx > 0)
+			nextStr += "\r\n\r\n";
+
 		//Append to text field.
 		for (int i = 0; i < charArray.Length; i++) {
 			float nextDelay = GetDelay ();
 
 			//Check for user acceleration.
-			if (nextDelay == -1f) {
+			if (noDelay) {
 				for (int j = i; j < charArray.Length; j++)
 					nextStr += charArray[j];
 
@@ -121,15 +128,19 @@ public class TimedTextEntry : MonoBehaviour {
 	//Indicate an entry is finished.
 	void EndEntry () {
 		entryIdx++;
+
+		if (!string.IsNullOrEmpty (continueMessage)) {
+			targetText.text += "\r\n\r\n";
+			targetText.text += continueMessage;
+		}
+
 		noDelay = false;
 		typingCoroutine = null;
 	}
 
 	//Calculate the delay before entry of next character.
+	//Clear Code > Clever Code, lol.
 	float GetDelay () {
-		if (noDelay)
-			return -1f;
-
 		float fullDelay = letterDelay;
 		if (maxRandomDelay != 0f)
 			fullDelay += UnityEngine.Random.Range (-maxRandomDelay, maxRandomDelay);
