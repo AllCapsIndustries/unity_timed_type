@@ -5,7 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TimedTextEntry : MonoBehaviour {
+	//Drags
 	public Text targetText;
+	
+	//Editor Config
 	[TextArea] public string[] printStrings;
 	public float letterDelay = 0.1f;
 	public float maxRandomDelay = 0.05f;
@@ -13,64 +16,68 @@ public class TimedTextEntry : MonoBehaviour {
 	public bool printOnStart = true;
 	public UnityEngine.KeyCode[] continueKeyCodes;
 
+	//Bookkeeping
+	Coroutine typingCoroutine;
 	int entryIdx;
 	string nextStr;
 	bool noDelay;
-	Coroutine typingCoroutine;
+	bool finishedPrinting;
 
+	//Debug
 	[SerializeField] private bool debugTimedText;
-	private bool finishedPrinting;
 
 	// Use this for initialization
 	void Start () {
 		targetText.text = "";
 
 		if (printOnStart)
-			typingCoroutine = StartCoroutine (EnterNextString ());
+			NextSequence ();
 	}
 
-	//Use this to set as a UI element action.
+	//Use this to set as a UI element action, such as button press.
 	public void BtnPressNextSequence () {
-		PrintNextSequence ();
+		NextSequence ();
 	}
 
-	//Use this if you want accelerated output via keyboard or mouse or something.
+	//Check for accelerated output via user input.
 	void Update () {
 		if (finishedPrinting)
 			return;
 
+		//If no existing continue inputs, keep moving.
 		if (typingCoroutine == null &&
 			(continueKeyCodes.Length == 0 || continueKeyCodes[0] == KeyCode.None)) {
-
-			PrintNextSequence ();
-
+			NextSequence ();
 			return;
 		}
 
+		//Check for continue key code input.
 		for (int i = 0; i < continueKeyCodes.Length; i++) {
-			if (Input.GetKeyDown (continueKeyCodes[i]))
-				PrintNextSequence ();
+			if (Input.GetKeyDown (continueKeyCodes[i])) {
+				NextSequence ();
+				return;
+			}
 		}
 	}
 
-	void PrintNextSequence () {
+	//Move to the next sequence depending on state.
+	void NextSequence () {
 		if (typingCoroutine == null) {
-			typingCoroutine = StartCoroutine (EnterNextString ());
+			NextEntry ();
 		} else {
 			noDelay = true;
 		}
 	}
 
-	IEnumerator EnterNextString () {
+	//If valid, start the coroutine to type a new entry.
+	void NextEntry () {
 		if (entryIdx >= printStrings.Length) {
-			if (debugTimedText) {
-				targetText.text = "No more stuff to display. Exit the sequence here.";
+			if (debugTimedText)
 				print ("No more strings to display. Do something else now.");
-			}
 
 			finishedPrinting = true;
 
-			yield break;
+			return;
 		}
 
 		if (clearBetweenEntries) {
@@ -78,36 +85,48 @@ public class TimedTextEntry : MonoBehaviour {
 			nextStr = "";
 		}
 
+		typingCoroutine = StartCoroutine (TypeNextEntry ());
+	}
+
+	//Type out a timed entry and push it to the text field.
+	IEnumerator TypeNextEntry () {
 		char[] charArray = printStrings[entryIdx].ToCharArray ();
 
+		//Append to text field.
 		for (int i = 0; i < charArray.Length; i++) {
 			float nextDelay = GetDelay ();
 
+			//Check for user acceleration.
 			if (nextDelay == -1f) {
-				//Finish printing to text immediately.
 				for (int j = i; j < charArray.Length; j++)
 					nextStr += charArray[j];
 
 				targetText.text = nextStr;
-				EndStringEntry ();
+
+				EndEntry ();
 
 				yield break;
 			}
+
+			//Continue with normal timed routine.
 			nextStr += charArray[i];
 			targetText.text = nextStr;
 
 			yield return new WaitForSeconds (nextDelay);
 		}
-		EndStringEntry ();
+
+		EndEntry ();
 	}
 
-	private void EndStringEntry () {
+	//Indicate an entry is finished.
+	void EndEntry () {
 		entryIdx++;
 		noDelay = false;
 		typingCoroutine = null;
 	}
 
-	private float GetDelay () {
+	//Calculate the delay before entry of next character.
+	float GetDelay () {
 		if (noDelay)
 			return -1f;
 
