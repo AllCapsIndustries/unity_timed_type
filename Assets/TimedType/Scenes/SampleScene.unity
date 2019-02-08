@@ -839,16 +839,17 @@ MonoBehaviour:
   printStrings:
   - 'This is a test.
 
+'
+  - '
+
+    Just modifed the Sample Scene to make sure it''s included in repo.
 
 '
-  - 'Just modifed the Sample Scene to make sure it''s included in repo.
-
-
-'
-  - "// Use this for initialization\r\n\tvoid Start () {\r\n\t\ttargetText.text =
-    \"\";\r\n\r\n\t\tif (printOnStart)\r\n\t\t\ttypingCoroutine = StartCoroutine (EnterNextString
-    ());\r\n\t}\r\n\r\n\t//Use this to set as a UI element action.\r\n\tpublic void
-    BtnPressNextSequence () {\r\n\t\tPrintNextSequence ();\r\n\t}"
+  - "\n// Use this for initialization\r\n\tvoid Start () {\r\n\t\ttargetText.text
+    = \"\";\r\n\r\n\t\tif (printOnStart)\r\n\t\t\ttypingCoroutine = StartCoroutine
+    (EnterNextString ());\r\n\t}\r\n\r\n\t//Use this to set as a UI element action.\r\n\tpublic
+    void BtnPressNextSequence () {\r\n\t\tPrintNextSequence ();\r\n\t}\n"
+  continueMessage: "\nPress Space or Left Click to Continue...\r"
   letterDelay: 0.1
   maxRandomDelay: 0.05
   clearBetweenEntries: 0
