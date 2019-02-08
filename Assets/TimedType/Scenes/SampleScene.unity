@@ -476,6 +476,10 @@ MonoBehaviour:
 
 
 '
+  - 'Just modifed the Sample Scene to make sure it''s included in repo.
+
+
+'
   - "// Use this for initialization\r\n\tvoid Start () {\r\n\t\ttargetText.text =
     \"\";\r\n\r\n\t\tif (printOnStart)\r\n\t\t\ttypingCoroutine = StartCoroutine (EnterNextString
     ());\r\n\t}\r\n\r\n\t//Use this to set as a UI element action.\r\n\tpublic void
