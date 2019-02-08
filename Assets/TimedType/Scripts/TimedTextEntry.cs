@@ -10,6 +10,7 @@ public class TimedTextEntry : MonoBehaviour {
 	
 	//Editor Config
 	[TextArea] public string[] printStrings;
+	[TextArea] public string continueMessage = "Press Space or Click to Continue...\r";
 	public float letterDelay = 0.1f;
 	public float maxRandomDelay = 0.05f;
 	public bool clearBetweenEntries = false;
@@ -77,6 +78,8 @@ public class TimedTextEntry : MonoBehaviour {
 
 			finishedPrinting = true;
 
+			//DoSomethingElseEntirelyHere();
+
 			return;
 		}
 
@@ -97,7 +100,7 @@ public class TimedTextEntry : MonoBehaviour {
 			float nextDelay = GetDelay ();
 
 			//Check for user acceleration.
-			if (nextDelay == -1f) {
+			if (noDelay) {
 				for (int j = i; j < charArray.Length; j++)
 					nextStr += charArray[j];
 
@@ -121,15 +124,17 @@ public class TimedTextEntry : MonoBehaviour {
 	//Indicate an entry is finished.
 	void EndEntry () {
 		entryIdx++;
+
+		if (!string.IsNullOrEmpty(continueMessage)){
+			targetText.text += continueMessage;
+		}
+
 		noDelay = false;
 		typingCoroutine = null;
 	}
 
 	//Calculate the delay before entry of next character.
 	float GetDelay () {
-		if (noDelay)
-			return -1f;
-
 		float fullDelay = letterDelay;
 		if (maxRandomDelay != 0f)
 			fullDelay += UnityEngine.Random.Range (-maxRandomDelay, maxRandomDelay);
